@@ -11,7 +11,13 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    if params[:title] == "sort"
+      @movies = Movie.all.order(:title => "ASC")
+    elsif params[:release_date] == "sort"
+      @movies = Movie.all.order(:release_date => "ASC")
+    else
+      @movies = Movie.all
+    end 
   end
 
   def new
@@ -19,10 +25,12 @@ class MoviesController < ApplicationController
   end
 
   def create
-    @movie = Movie.create!(movie_params)
+    #@movie = Movie.create!(params[:movie]) #old way
+    @movie = Movie.create!(movie_params)  # new way
     flash[:notice] = "#{@movie.title} was successfully created."
     redirect_to movies_path
   end
+
 
   def edit
     @movie = Movie.find params[:id]
@@ -30,7 +38,8 @@ class MoviesController < ApplicationController
 
   def update
     @movie = Movie.find params[:id]
-    @movie.update_attributes!(movie_params)
+    #@movie.update_attributes!(params[:movie])  # old way
+    @movie.update_attributes!(movie_params)  # new way  
     flash[:notice] = "#{@movie.title} was successfully updated."
     redirect_to movie_path(@movie)
   end
@@ -40,6 +49,13 @@ class MoviesController < ApplicationController
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
+  end
+  
+  # add below all other methods
+  private
+
+  def movie_params
+    params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
 
 end
